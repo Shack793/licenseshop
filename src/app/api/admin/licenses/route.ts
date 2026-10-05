@@ -9,8 +9,8 @@ export async function GET(req: Request) {
     where: q
       ? {
           OR: [
-            { email: { contains: q, mode: 'insensitive' } },
-            { key: { contains: q, mode: 'insensitive' } },
+            { email: { contains: q } },
+            { key: { contains: q } },
           ],
         }
       : undefined,
