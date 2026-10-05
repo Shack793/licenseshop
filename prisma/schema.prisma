@@ -1,0 +1,148 @@
+// Prisma schema for the no-accounts bot storefront.
+// Run `npm run db:push` after setting DATABASE_URL to create these tables.
+//
+// Provider is MySQL to match Namecheap's Stellar Business shared hosting,
+// which gives you a MySQL database in cPanel but no Postgres. If you're
+// deploying to Vercel instead and want to use Neon (Postgres) there,
+// change `provider` below to "postgresql" and drop the `@db.*` type
+// annotations added for MySQL's stricter index-length rules.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// No User model: a License is anchored to an email address directly.
+// Nothing to log into — the key itself, sent by email, is the credential.
+model License {
+  id              String        @id @default(uuid()) @db.Char(36)
+  key             String        @unique @db.VarChar(32)
+  email           String        @db.VarChar(191)
+  tier            String        @default("standard") @db.VarChar(32)
+  status          LicenseStatus @default(ACTIVE)
+  isTrial         Boolean       @default(false)
+  expiresAt       DateTime?     // null = perpetual
+  deviceLimit     Int           @default(2)
+  activationsUsed Int           @default(0)
+  createdAt       DateTime      @default(now())
+  revokedAt       DateTime?
+
+  activations Activation[]
+  payment     Payment?
+
+  @@index([email])
+  @@map("licenses")
+}
+
+model Activation {
+  id          String   @id @default(uuid()) @db.Char(36)
+  licenseId   String   @db.Char(36)
+  license     License  @relation(fields: [licenseId], references: [id])
+  deviceHash  String   @db.VarChar(64) // sha256 hex of a machine fingerprint, computed client-side
+  activatedAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  @@unique([licenseId, deviceHash])
+  @@index([deviceHash])
+  @@map("activations")
+}
+
+model Payment {
+  id           String        @id @default(uuid()) @db.Char(36)
+  email        String        @db.VarChar(191)
+  processor    String        @default("nowpayments") @db.VarChar(32)
+  processorRef String        @unique @db.VarChar(191)
+  amount       Decimal       @db.Decimal(10, 2)
+  currency     String        @db.VarChar(16)
+  payCurrency  String?       @db.VarChar(16)
+  status       PaymentStatus @default(PENDING)
+  licenseId    String?       @unique @db.Char(36)
+  license      License?      @relation(fields: [licenseId], references: [id])
+  createdAt    DateTime      @default(now())
+  confirmedAt  DateTime?
+
+  @@map("payments")
+}
+
+// Gates trial-key issuance behind a clicked email link, so we're not
+// mailing keys to addresses nobody can actually receive at.
+model EmailVerification {
+  id         String    @id @default(uuid()) @db.Char(36)
+  email      String    @db.VarChar(191)
+  token      String    @unique @db.VarChar(64)
+  purpose    String    @default("trial") @db.VarChar(32) // room for other verified flows later
+  verifiedAt DateTime?
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+  @@map("email_verifications")
+}
+
+// The device-fingerprint side of trial-abuse prevention: once a deviceHash
+// has activated ANY trial license, it's locked out of activating a second
+// one — independent of which email or key was used to request it.
+// Populated the first time a trial license activates on a device; checked
+// on every subsequent trial activation attempt from a *different* license.
+model TrialDeviceLock {
+  deviceHash String   @id @db.VarChar(64)
+  licenseId  String   @db.Char(36)
+  lockedAt   DateTime @default(now())
+
+  @@map("trial_device_locks")
+}
+
+// DB-backed rate limiting (works across serverless instances, unlike an
+// in-memory counter). A row per request attempt; checkRateLimit() in
+// src/lib/rate-limit.ts counts rows in the current window per bucket+identifier.
+model RateLimitHit {
+  id         String   @id @default(uuid()) @db.Char(36)
+  bucket     String   @db.VarChar(32) // e.g. "trial-request-ip", "checkout-ip"
+  identifier String   @db.VarChar(100) // IP address or email, depending on bucket
+  createdAt  DateTime @default(now())
+
+  @@index([bucket, identifier, createdAt])
+  @@map("rate_limit_hits")
+}
+
+// Local-disk file storage for Namecheap shared hosting (see
+// src/lib/storage.ts). Short-lived tokens that gate a direct file read from
+// local-releases/.
+model DownloadToken {
+  token     String   @id @db.VarChar(64)
+  filePath  String   @db.VarChar(500)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("download_tokens")
+}
+
+model Release {
+  id         String   @id @default(uuid()) @db.Char(36)
+  version    String   @unique @db.VarChar(32)
+  changelog  String   @db.Text
+  filePath   String   @db.VarChar(500)
+  fileSize   Int?
+  isLatest   Boolean  @default(false)
+  releasedAt DateTime @default(now())
+
+  @@map("releases")
+}
+
+enum LicenseStatus {
+  ACTIVE
+  TRIAL
+  EXPIRED
+  REVOKED
+}
+
+enum PaymentStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  EXPIRED
+}

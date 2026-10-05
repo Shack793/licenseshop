@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Prisma generate (no DB needed)
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build (dummy env, no live DB needed)
+        run: npm run build
+        env:
+          DATABASE_URL: mysql://user:pass@localhost:3306/dummy
+          NEXTAUTH_URL: http://localhost:3000
+          NOWPAYMENTS_API_KEY: dummy
+          NOWPAYMENTS_IPN_SECRET: dummy
+          SMTP_HOST: mail.example.com
+          SMTP_PORT: 465
+          SMTP_SECURE: "true"
+          SMTP_USER: dummy@example.com
+          SMTP_PASSWORD: dummy
+          EMAIL_FROM: dummy@example.com
+          ADMIN_PASSWORD: dummy
+          ADMIN_SESSION_SECRET: dummy-32-byte-secret-for-ci-only-1234

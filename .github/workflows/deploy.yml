@@ -1,0 +1,89 @@
+name: Deploy to Namecheap
+
+# SSH-only CD for Namecheap Stellar Business shared hosting.
+# Flow: build on GitHub (big RAM) -> rsync over SSH -> SSH restart.
+# No FTP. DB migrations are NOT run here: cPanel MySQL is localhost-only,
+# GitHub can't reach it. Run `npx prisma db push` once via cPanel's SSH shell.
+#
+# Required GitHub Secrets (Repo -> Settings -> Secrets -> Actions):
+#   SSH_HOST, SSH_USER, SSH_KEY, SSH_PORT (usually 22, Namecheap sometimes 21098), SSH_APP_DIR (e.g. ~/shoepilot-pro)
+#
+# Required one-time cPanel setup:
+#   1. cPanel -> SSH Access -> generate/import key, authorize it, enable SSH
+#   2. Setup Node.js App, root = SSH_APP_DIR, startup file = server.js, Node 20.x
+#   3. Add all .env.example vars in that screen's Environment variables
+#   4. MySQL Databases + Email Accounts created, Run NPM Install clicked once
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+      - name: Build
+        run: npm run build
+        env:
+          DATABASE_URL: mysql://user:pass@localhost:3306/dummy
+          NEXTAUTH_URL: http://localhost:3000
+          NOWPAYMENTS_API_KEY: dummy
+          NOWPAYMENTS_IPN_SECRET: dummy
+          SMTP_HOST: mail.example.com
+          SMTP_PORT: 465
+          SMTP_SECURE: "true"
+          SMTP_USER: dummy@example.com
+          SMTP_PASSWORD: dummy
+          EMAIL_FROM: dummy@example.com
+          ADMIN_PASSWORD: dummy
+          ADMIN_SESSION_SECRET: dummy-32-byte-secret-for-ci-only-1234
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Rsync built app over SSH (no node_modules, no live releases)
+        run: |
+          rsync -avz --delete \
+            -e "ssh -p ${{ secrets.SSH_PORT }} -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='node_modules/' \
+            --exclude='local-releases/' \
+            --exclude='.env' \
+            --exclude='.env.local' \
+            --exclude='*.log' \
+            --exclude='.DS_Store' \
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_APP_DIR }}/
+
+      - name: SSH install + restart Passenger
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ${{ secrets.SSH_APP_DIR }}
+            npm install --production
+            npx prisma generate
+            mkdir -p tmp
+            touch tmp/restart.txt
+            echo "Deployed $(date -u) - restart triggered"
