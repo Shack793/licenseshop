@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+export const dynamic = 'force-dynamic';
+
 
 // Public — version history isn't sensitive, only the actual download
 // (gated by license key at /api/download/[releaseId]) is.

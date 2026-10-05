@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { consumeVerificationToken } from '@/lib/verification';
 import { prisma } from '@/lib/db';
 import { sendLicenseEmail } from '@/lib/email';
+export const dynamic = 'force-dynamic';
+
 
 export async function GET(req: Request) {
   const url = new URL(req.url);

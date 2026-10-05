@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db';
 import { verifyIpnSignature } from '@/lib/nowpayments';
 import { createPerpetualLicense } from '@/lib/license';
 import { sendLicenseEmail } from '@/lib/email';
+export const dynamic = 'force-dynamic';
+
 
 // NOWPayments IPN statuses that mean funds have actually settled. Only
 // issue the license on the terminal "finished" state.

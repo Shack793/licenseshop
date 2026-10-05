@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { checkAdminPassword, createAdminSessionCookie, ADMIN_COOKIE_NAME } from '@/lib/admin-auth';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+export const dynamic = 'force-dynamic';
+
 
 const schema = z.object({ password: z.string().min(1) });
 

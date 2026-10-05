@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { validateLicenseKey } from '@/lib/license';
+export const dynamic = 'force-dynamic';
+
 
 const validateSchema = z.object({
   key: z.string().min(1),

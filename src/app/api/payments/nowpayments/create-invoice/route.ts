@@ -4,6 +4,8 @@ import { prisma } from '@/lib/db';
 import { createInvoice } from '@/lib/nowpayments';
 import { isDisposableEmail } from '@/lib/disposable-email';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+export const dynamic = 'force-dynamic';
+
 
 const checkoutSchema = z.object({ email: z.string().email() });
 

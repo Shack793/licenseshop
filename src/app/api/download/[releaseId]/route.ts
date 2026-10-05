@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { prisma } from '@/lib/db';
 import { getSignedDownloadUrl } from '@/lib/storage';
+export const dynamic = 'force-dynamic';
+
 
 const schema = z.object({ key: z.string().min(1) });
 

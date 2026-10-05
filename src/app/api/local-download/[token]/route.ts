@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { readLocalFile, localFileExists, isUsingLocalStorage } from '@/lib/storage';
+export const dynamic = 'force-dynamic';
+
 
 // Only reachable at all when R2 isn't configured — see src/lib/storage.ts.
 // Mirrors what an S3 presigned URL gives you: a short-lived, one-purpose

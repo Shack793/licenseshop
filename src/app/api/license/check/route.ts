@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getLicenseStatus } from '@/lib/license';
+export const dynamic = 'force-dynamic';
+
 
 const schema = z.object({ key: z.string().min(1) });
 

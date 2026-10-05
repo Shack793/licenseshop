@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { createVerificationToken } from '@/lib/verification';
 import { sendResendVerificationEmail } from '@/lib/email';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+export const dynamic = 'force-dynamic';
+
 
 const schema = z.object({ email: z.string().email() });
 

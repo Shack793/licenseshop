@@ -4,6 +4,8 @@ import { isDisposableEmail } from '@/lib/disposable-email';
 import { createVerificationToken } from '@/lib/verification';
 import { sendVerificationEmail } from '@/lib/email';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+export const dynamic = 'force-dynamic';
+
 
 const requestSchema = z.object({ email: z.string().email() });
 

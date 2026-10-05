@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { uploadRelease } from '@/lib/storage';
+export const dynamic = 'force-dynamic';
+
 
 // Gated by middleware.ts (checks the admin_session cookie for every
 // /api/admin/* path) — no auth check needed in here.
