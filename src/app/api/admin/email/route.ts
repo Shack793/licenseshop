@@ -3,8 +3,6 @@ import { z } from 'zod';
 import { resolveSmtp, getTemplate } from '@/lib/email';
 import { encryptSecret, saveSettings } from '@/lib/settings';
 import {
-export const dynamic = 'force-dynamic';
-
   DEFAULT_TEMPLATES,
   PLACEHOLDER_HELP,
   TEMPLATE_KINDS,
@@ -12,6 +10,8 @@ export const dynamic = 'force-dynamic';
   validateTemplate,
   type TemplateKind,
 } from '@/lib/email-templates';
+
+export const dynamic = 'force-dynamic';
 
 // Behind the admin middleware (/api/admin/*). The SMTP password is write-only:
 // it is never sent back to the browser, only whether one is set.

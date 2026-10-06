@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { resolveSmtp, sendMailWith, type SmtpConfig } from '@/lib/email';
 import {
-export const dynamic = 'force-dynamic';
-
   renderTemplate,
   SAMPLE_VARS,
   TEMPLATE_KINDS,
   type TemplateKind,
 } from '@/lib/email-templates';
+
+export const dynamic = 'force-dynamic';
 
 // Sends a test message using the values currently in the admin form (so you
 // can try settings BEFORE saving them). A blank password means "use the saved one".
