@@ -1,19 +1,25 @@
 import nodemailer from 'nodemailer';
 
-// Plain SMTP instead of a third-party email API (Resend, etc.) so this can
-// send through the mailbox that already comes free with Namecheap hosting
-// (cPanel -> Email Accounts -> create one, e.g. licenses@blackjack.us) —
-// no separate email service or its own billing to set up. Works the same
-// way against any other SMTP provider too if you'd rather use one.
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT || 587),
-  secure: process.env.SMTP_SECURE === 'true', // true for port 465, false for 587/25
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+// Plain local sendmail by default: on cPanel shared hosting the mail
+// binary is right there (/usr/sbin/sendmail), so there's no hostname to
+// resolve, no TLS cert to match, and no SMTP login — the three things that
+// break one after another in a jail. Set SMTP_HOST to route through an
+// external SMTP server instead (works the same way against any provider).
+const transporter = process.env.SMTP_HOST
+  ? nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT || 587),
+      secure: process.env.SMTP_SECURE === 'true', // true for port 465, false for 587/25
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    })
+  : nodemailer.createTransport({
+      sendmail: true,
+      newline: 'unix',
+      path: '/usr/sbin/sendmail',
+    });
 
 const PRODUCT_NAME = 'Hi-Opt II Counter';
 const APP_URL = `${process.env.NEXTAUTH_URL || 'https://blackjacklab.us'}/app`;
