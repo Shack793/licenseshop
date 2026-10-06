@@ -1,16 +1,17 @@
 import Link from 'next/link';
 
 export default function Home() {
-  const price = process.env.PRODUCT_PRICE_USD ?? '49.00';
+  const price = process.env.PRODUCT_PRICE_USD ?? '19.99';
   const trialDays = process.env.TRIAL_DAYS ?? '3';
 
   return (
     <div>
       <nav className="nav">
         <div className="wordmark">
-          <span className="suit">♠</span> Shoepilot Pro
+          <span className="suit">♠</span> Hi-Opt II Counter
         </div>
         <div className="nav-links">
+          <a href="/app">Open app</a>
           <Link href="/license">Check a key</Link>
           <Link href="/checkout">Buy</Link>
         </div>
@@ -56,7 +57,7 @@ export default function Home() {
             <h2>What's included</h2>
           </div>
           <div className="ledger-row">
-            <div className="label">Perpetual license</div>
+            <div className="label">Lifetime license</div>
             <div className="desc">Pay once, keep every future version — no recurring charge.</div>
           </div>
           <div className="ledger-row">
@@ -69,7 +70,7 @@ export default function Home() {
           </div>
           <div className="ledger-row">
             <div className="label">Crypto checkout</div>
-            <div className="desc">BTC, ETH, USDC, and other major coins accepted.</div>
+            <div className="desc">Pay with USDT or USDC stablecoins — no price swings.</div>
           </div>
         </div>
 

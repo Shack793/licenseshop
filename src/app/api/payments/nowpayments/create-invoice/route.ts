@@ -4,10 +4,10 @@ import { prisma } from '@/lib/db';
 import { createInvoice } from '@/lib/nowpayments';
 import { isDisposableEmail } from '@/lib/disposable-email';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
-export const dynamic = 'force-dynamic';
-
 
 const checkoutSchema = z.object({ email: z.string().email() });
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   const ip = getClientIp(req);
@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     );
   }
 
-  const priceUsd = Number(process.env.PRODUCT_PRICE_USD ?? '49.00');
+  const priceUsd = Number(process.env.PRODUCT_PRICE_USD ?? '19.99');
 
   // Payment row is keyed by email, not a session/user id — there's no
   // account here, so the email the buyer typed IS the record of who paid.
@@ -53,7 +53,8 @@ export async function POST(req: Request) {
       priceAmount: priceUsd,
       priceCurrency: 'usd',
       orderId: payment.id,
-      orderDescription: 'Shoepilot Pro — perpetual license',
+      orderDescription: 'Hi-Opt II Counter — lifetime license',
+      feePaidByUser: process.env.NOWPAYMENTS_FEE_PAID_BY_USER === 'true',
     });
 
     await prisma.payment.update({

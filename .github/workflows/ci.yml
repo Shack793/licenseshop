@@ -40,3 +40,4 @@ jobs:
           EMAIL_FROM: dummy@example.com
           ADMIN_PASSWORD: dummy
           ADMIN_SESSION_SECRET: dummy-32-byte-secret-for-ci-only-1234
+          NEXT_PUBLIC_PRODUCT_PRICE_USD: 19.99

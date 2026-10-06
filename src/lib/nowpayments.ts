@@ -9,10 +9,13 @@ function apiKey() {
 }
 
 export interface CreateInvoiceParams {
-  priceAmount: number; // in fiat, e.g. 49.00
+  priceAmount: number; // in fiat, e.g. 19.99
   priceCurrency: string; // e.g. "usd"
   orderId: string; // your internal payment.id, so the webhook can look it up
   orderDescription: string;
+  // Make the buyer cover NOWPayments' service fee on top of the price, so you
+  // receive the full amount. Off by default; see NOWPAYMENTS_FEE_PAID_BY_USER.
+  feePaidByUser?: boolean;
 }
 
 export async function createInvoice(params: CreateInvoiceParams) {
@@ -27,6 +30,7 @@ export async function createInvoice(params: CreateInvoiceParams) {
       price_currency: params.priceCurrency,
       order_id: params.orderId,
       order_description: params.orderDescription,
+      ...(params.feePaidByUser ? { is_fee_paid_by_user: true } : {}),
       ipn_callback_url: `${process.env.NEXTAUTH_URL}/api/payments/nowpayments/webhook`,
       success_url: `${process.env.NEXTAUTH_URL}/license?purchase=success`,
       cancel_url: `${process.env.NEXTAUTH_URL}/checkout?purchase=cancelled`,

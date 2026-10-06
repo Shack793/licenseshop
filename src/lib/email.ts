@@ -15,7 +15,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const PRODUCT_NAME = 'Shoepilot Pro';
+const PRODUCT_NAME = 'Hi-Opt II Counter';
+const APP_URL = `${process.env.NEXTAUTH_URL || 'https://blackjacklab.us'}/app`;
 
 export async function sendVerificationEmail(to: string, verifyUrl: string) {
   await transporter.sendMail({
@@ -45,8 +46,8 @@ export async function sendLicenseEmail(
     ? `Your ${PRODUCT_NAME} trial license key`
     : `Your ${PRODUCT_NAME} license key — thanks for your purchase`;
   const body = isTrial
-    ? `Your ${trialDays ?? 3}-day ${PRODUCT_NAME} trial license key is:\n\n${licenseKey}\n\nEnter this in the app to activate your trial. Keep this email — there's no account to log back into, so this key (and the "check your license" page on the site) is how you check your status or grab updates later.`
-    : `Thanks for your purchase! Your ${PRODUCT_NAME} license key is:\n\n${licenseKey}\n\nThis key is perpetual — keep this email somewhere safe. Use the "check your license" page on the site anytime to see its status or download the latest version.`;
+    ? `Your ${trialDays ?? 3}-day ${PRODUCT_NAME} trial license key is:\n\n${licenseKey}\n\nOpen the app at ${APP_URL} and paste this key to start your trial. The trial runs for ${trialDays ?? 3} days from today — after that the app locks until you buy a license. Keep this email — there's no account to log back into, so this key is how you get back in.`
+    : `Thanks for your purchase! Your ${PRODUCT_NAME} license key is:\n\n${licenseKey}\n\nThis key is for life — keep this email somewhere safe. Open the app at ${APP_URL} and paste your key to get started.`;
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM!,
