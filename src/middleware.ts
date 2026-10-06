@@ -5,7 +5,7 @@ import { verifyAdminSessionCookie, ADMIN_COOKIE_NAME } from '@/lib/admin-auth';
 // itself. This is the ONLY thing standing between the public internet and
 // the admin dashboard, so it fails closed: no cookie or a bad cookie means
 // no access, full stop.
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   const isLoginPage = pathname === '/admin/login';
@@ -15,7 +15,7 @@ export function middleware(req: NextRequest) {
 
   if (isAdminPath || isAdminApi) {
     const cookie = req.cookies.get(ADMIN_COOKIE_NAME)?.value;
-    if (!verifyAdminSessionCookie(cookie)) {
+    if (!(await verifyAdminSessionCookie(cookie))) {
       if (isAdminApi) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       }

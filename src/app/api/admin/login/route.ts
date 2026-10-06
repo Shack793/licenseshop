@@ -23,12 +23,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Enter the admin password' }, { status: 400 });
   }
 
-  if (!checkAdminPassword(parsed.data.password)) {
+  if (!(await checkAdminPassword(parsed.data.password))) {
     return NextResponse.json({ error: 'Incorrect password' }, { status: 401 });
   }
 
   const res = NextResponse.json({ success: true });
-  res.cookies.set(ADMIN_COOKIE_NAME, createAdminSessionCookie(), {
+  res.cookies.set(ADMIN_COOKIE_NAME, await createAdminSessionCookie(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
