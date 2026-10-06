@@ -50,7 +50,7 @@ export default function CheckoutPage() {
         <div className="price-row" style={{ marginBottom: '1.4rem' }}>
           <div>License</div>
           <div className="amount">
-            ${process.env.NEXT_PUBLIC_PRODUCT_PRICE_USD ?? '49.00'}
+            ${process.env.NEXT_PUBLIC_PRODUCT_PRICE_USD ?? '19.99'}
             <small>one-time</small>
           </div>
         </div>

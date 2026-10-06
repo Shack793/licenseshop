@@ -133,6 +133,17 @@ model Release {
   @@map("releases")
 }
 
+// Admin-editable key/value settings (SMTP details + email templates, edited at
+// /admin/email). The SMTP password is stored encrypted — see src/lib/settings.ts.
+// When a key is absent the app falls back to the environment / built-in defaults.
+model Setting {
+  key       String   @id @db.VarChar(100)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
 enum LicenseStatus {
   ACTIVE
   TRIAL

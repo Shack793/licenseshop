@@ -20,6 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/releases', label: 'Releases' },
     { href: '/admin/licenses', label: 'Licenses' },
     { href: '/admin/payments', label: 'Payments' },
+    { href: '/admin/email', label: 'Email' },
   ];
 
   return (

@@ -228,3 +228,48 @@ input[type='file'] {
   }
   .search-row input { min-width: 0; width: 100%; }
 }
+
+/* ---------- Landing: conversion sections ---------- */
+.hero.hero-wide h1 { max-width: 22ch; font-size: 2.4rem; }
+.hero.hero-wide .eyebrow { color: var(--gold); font-size: 0.8rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.8rem; }
+.hero.hero-wide .trial-line { color: var(--ink); font-weight: 500; margin: 0 0 0.3rem; }
+.hero.hero-wide .price-line { color: var(--gold); font-family: 'Fraunces', serif; font-size: 1.3rem; margin: 0 0 1.6rem; }
+.hero-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.4rem; }
+.hero-tags span { border: 1px solid var(--line); border-radius: 999px; padding: 0.25rem 0.7rem; font-size: 0.8rem; color: var(--ink-dim); }
+.shot-wrap { max-width: 920px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+.shot-wrap img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 10px; }
+.shot-wrap .fine-print { margin-top: 0.7rem; text-align: center; }
+.check-list { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem 2rem; }
+.check-list li { color: var(--ink-dim); font-size: 0.97rem; padding-left: 1.6rem; position: relative; }
+.check-list li::before { content: '✓'; color: var(--gold); position: absolute; left: 0; }
+@media (max-width: 720px) { .check-list { grid-template-columns: 1fr; } }
+.hero.hero-wide p { max-width: 58ch; }
+
+/* ---------- Admin: email settings ---------- */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.2rem; }
+.admin-panel h3 { font-size: 1.1rem; }
+select {
+  width: 100%; padding: 0.7rem 0.85rem; border-radius: 3px; border: 1px solid var(--line);
+  background: var(--bg-deep); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.95rem; margin-bottom: 1.1rem;
+}
+.tpl-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.chip {
+  background: var(--bg-deep); color: var(--gold); border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.2rem 0.65rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; cursor: pointer;
+}
+.chip:hover { border-color: var(--gold); }
+@media (max-width: 720px) { .form-grid { grid-template-columns: 1fr; } }
+
+/* ---------- Landing: caption + Why Hi-Opt II ---------- */
+.shot-caption { margin-top: 0.9rem; text-align: center; display: flex; flex-direction: column; gap: 0.15rem; }
+.shot-caption strong { font-family: 'Fraunces', serif; font-weight: 500; }
+.shot-caption span { color: var(--ink-dim); font-size: 0.95rem; }
+.why-copy { color: var(--ink-dim); max-width: 62ch; margin-bottom: 1.4rem; }
+.count-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
+.count-grid > div { border: 1px solid var(--line); border-radius: 4px; padding: 1rem; display: flex; flex-direction: column; gap: 0.3rem; background: var(--bg-deep); }
+.count-grid .cnt { font-family: 'Fraunces', serif; font-size: 1.6rem; color: var(--gold); }
+.count-grid span:last-child { color: var(--ink-dim); font-size: 0.9rem; }
+@media (max-width: 720px) { .count-grid { grid-template-columns: repeat(2, 1fr); } }
+html { scroll-behavior: smooth; }

@@ -20,6 +20,15 @@ export async function checkRateLimit(
   if (count >= max) return false;
 
   await prisma.rateLimitHit.create({ data: { bucket, identifier } });
+
+  // Housekeeping: every call to the engine writes a row, so the table would
+  // grow without bound. Roughly 1 in 200 calls sweeps rows older than 3 days
+  // (longest window anywhere is 24h), which keeps it small without needing
+  // a cron job on shared hosting.
+  if (Math.random() < 0.005) {
+    const cutoff = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    prisma.rateLimitHit.deleteMany({ where: { createdAt: { lt: cutoff } } }).catch(() => {});
+  }
   return true;
 }
 
