@@ -32,7 +32,7 @@ export default function AdminLoginPage() {
   return (
     <div className="auth-shell">
       <h2>Admin</h2>
-      <p className="lede">Shoepilot Pro dashboard.</p>
+      <p className="lede">Hi-Opt II Counter dashboard.</p>
       <form onSubmit={handleSubmit}>
         <label>Password</label>
         <input

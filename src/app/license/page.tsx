@@ -55,6 +55,18 @@ export default function LicenseCheckPage() {
     setLoading(false);
   }
 
+  // The app reads the key from this browser's storage so the customer isn't
+  // asked to paste it a second time. Nothing else is stored.
+  function openApp() {
+    if (!license) return;
+    try {
+      localStorage.setItem('shoepilot_license_key', license.key);
+    } catch {
+      /* storage blocked — the app will just ask for the key */
+    }
+    window.location.href = '/app';
+  }
+
   async function handleDownload(releaseId: string) {
     setDownloadError('');
     const res = await fetch(`/api/download/${releaseId}`, {
@@ -115,7 +127,7 @@ export default function LicenseCheckPage() {
       <div className="license-plate">
         <div className="plate-head">
           <div>
-            <strong>{license.isTrial ? 'Trial license' : 'Perpetual license'}</strong>{' '}
+            <strong>{license.isTrial ? 'Trial license' : 'Lifetime license'}</strong>{' '}
             <span className={`tag ${tagClass}`}>{expired ? 'expired' : license.status.toLowerCase()}</span>
           </div>
           {license.expiresAt && (
@@ -140,9 +152,17 @@ export default function LicenseCheckPage() {
         </div>
       )}
 
-      <h2>Downloads &amp; version history</h2>
+      <h2>Open the app</h2>
+      <p className="fine-print">
+        Hi-Opt II Counter runs in your browser — nothing to install. Your key is checked every time it
+        loads, so it stops working when a trial ends or a license is revoked.
+      </p>
+      <button className="btn" disabled={!license.valid} onClick={openApp}>
+        {license.valid ? 'Open Hi-Opt II Counter' : 'License not active'}
+      </button>
+
+      {releases.length > 0 && <h2>Downloads &amp; version history</h2>}
       {downloadError && <div className="error-text">{downloadError}</div>}
-      {releases.length === 0 && <p className="fine-print">No releases published yet.</p>}
       <div className="timeline">
         {releases.map((r) => (
           <div className={`timeline-item ${r.isLatest ? 'latest' : ''}`} key={r.id}>

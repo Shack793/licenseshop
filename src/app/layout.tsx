@@ -1,8 +1,8 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Shoepilot Pro',
-  description: 'License and download Shoepilot Pro',
+  title: 'Hi-Opt II Counter',
+  description: 'License and download Hi-Opt II Counter',
 };
 
 export const viewport = {

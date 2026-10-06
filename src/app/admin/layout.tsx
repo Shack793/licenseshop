@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div>
       <nav className="admin-nav">
         <div className="wordmark">
-          <span className="suit">♠</span> Shoepilot Pro admin
+          <span className="suit">♠</span> Hi-Opt II Counter admin
         </div>
         <div className="admin-links">
           {links.map((l) => (
