@@ -273,3 +273,6 @@ select {
 .count-grid span:last-child { color: var(--ink-dim); font-size: 0.9rem; }
 @media (max-width: 720px) { .count-grid { grid-template-columns: repeat(2, 1fr); } }
 html { scroll-behavior: smooth; }
+
+.wordmark { display: inline-flex; align-items: center; gap: 0.55rem; }
+.wordmark .logo-mark { display: block; }

@@ -8,7 +8,7 @@ export default function Home() {
     <div>
       <nav className="nav">
         <div className="wordmark">
-          <span className="suit">♠</span> Hi-Opt II Counter
+          <img src="/logo.svg" alt="" width={26} height={26} className="logo-mark" /> Hi-Opt II Counter
         </div>
         <div className="nav-links">
           <a href="/app">Open app</a>

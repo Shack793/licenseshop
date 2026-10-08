@@ -52,6 +52,8 @@ css = """
 #engineNote.on{display:block}
 """
 html = must_replace(html, '</style>', css + '</style>')
+# favicon / app icons (files live in public/)
+html = must_replace(html, '<title>', '<link rel="icon" href="/favicon.ico" sizes="any">\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n<meta name="theme-color" content="#0f231c">\n' + '<title>')
 
 # ---------------------------------------------------------------- overlay HTML
 overlay = """<body>

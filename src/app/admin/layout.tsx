@@ -27,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div>
       <nav className="admin-nav">
         <div className="wordmark">
-          <span className="suit">♠</span> Hi-Opt II Counter admin
+          <img src="/logo.svg" alt="" width={20} height={20} className="logo-mark" /> Hi-Opt II Counter admin
         </div>
         <div className="admin-links">
           {links.map((l) => (

@@ -1,0 +1,20 @@
+{
+  "name": "Hi-Opt II Counter",
+  "short_name": "Hi-Opt II",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#0f231c",
+  "theme_color": "#0f231c",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
