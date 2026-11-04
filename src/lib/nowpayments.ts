@@ -18,7 +18,18 @@ export interface CreateInvoiceParams {
   feePaidByUser?: boolean;
 }
 
+function siteUrl(): string {
+  const base = (process.env.NEXTAUTH_URL || '').replace(/\/+$/, '');
+  // Without a real public URL NOWPayments can't call us back, which looks
+  // exactly like "nothing happens after payment" — fail loudly instead.
+  if (!/^https?:\/\/[^/]+/.test(base)) {
+    throw new Error('NEXTAUTH_URL is not set to your public site URL (e.g. https://blackjack.us)');
+  }
+  return base;
+}
+
 export async function createInvoice(params: CreateInvoiceParams) {
+  const base = siteUrl();
   const res = await fetch(`${API_BASE}/invoice`, {
     method: 'POST',
     headers: {
@@ -31,9 +42,9 @@ export async function createInvoice(params: CreateInvoiceParams) {
       order_id: params.orderId,
       order_description: params.orderDescription,
       ...(params.feePaidByUser ? { is_fee_paid_by_user: true } : {}),
-      ipn_callback_url: `${process.env.NEXTAUTH_URL}/api/payments/nowpayments/webhook`,
-      success_url: `${process.env.NEXTAUTH_URL}/license?purchase=success`,
-      cancel_url: `${process.env.NEXTAUTH_URL}/checkout?purchase=cancelled`,
+      ipn_callback_url: `${base}/api/payments/nowpayments/webhook`,
+      success_url: `${base}/checkout/success?order=${encodeURIComponent(params.orderId)}`,
+      cancel_url: `${base}/checkout?purchase=cancelled`,
     }),
   });
 
@@ -60,7 +71,10 @@ export function verifyIpnSignature(rawBody: string, signatureHeader: string | nu
   const sorted = JSON.stringify(sortKeysDeep(parsed));
 
   const hmac = crypto.createHmac('sha512', secret).update(sorted).digest('hex');
-  return crypto.timingSafeEqual(Buffer.from(hmac), Buffer.from(signatureHeader));
+  const a = Buffer.from(hmac);
+  const b = Buffer.from(signatureHeader.trim().toLowerCase());
+  // timingSafeEqual throws on different lengths; a wrong-length signature is just invalid.
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 function sortKeysDeep(obj: any): any {

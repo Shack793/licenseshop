@@ -1,14 +1,13 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { verifyIpnSignature } from '@/lib/nowpayments';
-import { createPerpetualLicense } from '@/lib/license';
-import { sendLicenseEmail } from '@/lib/email';
+import { fulfillPayment, setPayMeta } from '@/lib/payments';
 export const dynamic = 'force-dynamic';
 
-
-// NOWPayments IPN statuses that mean funds have actually settled. Only
-// issue the license on the terminal "finished" state.
-const SUCCESS_STATUSES = new Set(['finished']);
+// "confirmed" = the network has confirmed the buyer's transfer; "finished" =
+// NOWPayments has also forwarded the funds to you. For a $20 digital licence
+// there is no reason to make the buyer wait for the second step.
+const SUCCESS_STATUSES = new Set(['confirmed', 'finished']);
 const TERMINAL_FAILURE_STATUSES = new Set(['failed', 'expired', 'refunded']);
 
 export async function POST(req: Request) {
@@ -24,46 +23,35 @@ export async function POST(req: Request) {
   }
 
   if (!valid) {
-    // Do NOT process unverified webhooks — this is the check that stops
-    // someone from POSTing a fake "payment finished" event to fraudulently
-    // grant themselves a license.
+    // Do NOT process unverified webhooks — this is what stops someone POSTing a
+    // fake "payment finished" event to grant themselves a licence. If real
+    // payments land here, the IPN secret in NOWPayments doesn't match
+    // NOWPAYMENTS_IPN_SECRET on the server.
     console.warn('Rejected NOWPayments webhook with invalid signature');
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
   const event = JSON.parse(rawBody);
-  const orderId = event.order_id as string; // our Payment.id
-  const status = event.payment_status as string;
+  const orderId = String(event.order_id ?? '');
+  const status = String(event.payment_status ?? '');
+  console.log('NOWPayments IPN', { orderId, status });
 
-  const payment = await prisma.payment.findUnique({ where: { id: orderId } });
+  const payment = orderId ? await prisma.payment.findUnique({ where: { id: orderId } }) : null;
   if (!payment) {
     console.error('Webhook for unknown payment/order_id', orderId);
     return NextResponse.json({ error: 'Unknown order' }, { status: 404 });
   }
 
-  // Idempotency: NOWPayments retries webhooks.
-  if (payment.status === 'CONFIRMED') {
-    return NextResponse.json({ ok: true, alreadyProcessed: true });
-  }
+  await setPayMeta(payment.id, { lastIpnStatus: status, lastIpnAt: new Date().toISOString() });
 
   if (SUCCESS_STATUSES.has(status)) {
-    const license = await createPerpetualLicense(payment.email);
-
-    await prisma.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: 'CONFIRMED',
-        payCurrency: event.pay_currency ?? null,
-        confirmedAt: new Date(),
-        licenseId: license.id,
-      },
-    });
-
-    await sendLicenseEmail(payment.email, license.key, false);
-  } else if (TERMINAL_FAILURE_STATUSES.has(status)) {
+    // Idempotent: retries and the second (finished) callback just re-check that
+    // the licence exists and the key email went out.
+    await fulfillPayment(payment.id, event.pay_currency ?? null);
+  } else if (TERMINAL_FAILURE_STATUSES.has(status) && payment.status !== 'CONFIRMED') {
     await prisma.payment.update({ where: { id: payment.id }, data: { status: 'FAILED' } });
   }
-  // Intermediate statuses (waiting, confirming, sending) -> no-op, wait for next callback.
+  // Intermediate statuses (waiting, confirming, sending, partially_paid) -> wait for the next callback.
 
   return NextResponse.json({ ok: true });
 }
